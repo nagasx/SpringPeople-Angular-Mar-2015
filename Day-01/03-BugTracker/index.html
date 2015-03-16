@@ -97,7 +97,7 @@
                     var newBug = new Bug($scope.newBugData);
                     $scope.bugs.push(newBug);
                     bugStorage.save(newBug);
-                    $scope.newBug.title = '';
+                    $scope.newBugData.title = '';
                 }
                 $scope.bugs = bugStorage.getAll();
 
