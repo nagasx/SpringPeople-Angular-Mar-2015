@@ -3,20 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <title>Bug Tracker</title>
+    <style>
+        .closed{
+            color : red;
+            text-decoration: line-through;
+            font-style: italic;
+            font-weight: bold;
+        }
+    </style>
     <script src="angular.min.js"></script>
+
     <script>
+
+
+        /*
+        window.localStorage
+            - collection of key/value pairs
+            - both key and value should be of type string
+            APIs
+                - setItem(k,v)
+                - getItem(k) => value
+                - removeItem(k)
+                - clear()
+                - key(index) => key
+                - length
+
+                newKey = new Date().valueOf().toString()
+                window.JSON.stringify(emp) -> for serializing an object to a JSON string
+                window.JSON.parse(jsonString) -> for deserializing a JSON string to an object
+        */
+
+
+
+        angular
+            .module('bugTrackerApp',[])
+            .factory('Bug', function(){
+
+                var bugClass = function(title, isClosed){
+                    this.title = title;
+                    this.isClosed = isClosed || false;
+                }
+                bugClass.prototype.toggleStatus = function(){
+                    this.isClosed = !this.isClosed;
+                };
+                return bugClass;
+            })
+            .controller('bugsController', function($scope, Bug){
+                $scope.newBugTitle = '';
+                $scope.addNewBug = function(){
+                    var newBug = new Bug($scope.newBugTitle);
+                    $scope.bugs.push(newBug);
+                    $scope.newBugTitle = '';
+                }
+                $scope.bugs = [
+                   /* new Bug('Login button not enabled'),
+                    new Bug('Application crashes frequently'),
+                    new Bug('Response too slow')*/
+                ];
+                $scope.toggleStatus = function(bug){
+                    bug.toggleStatus();
+                };
+                $scope.removeClosed = function(){
+                    for(var i= $scope.bugs.length -1; i>=0; i--){
+                        var bug = $scope.bugs[i];
+                        if (bug.isClosed)
+                            $scope.bugs.splice(i,1);
+                    }
+                };
+            });
 
     </script>
 </head>
-<body>
+<body ng-app="bugTrackerApp">
     <h1>Bug Tracker</h1>
     <hr>
-    <div class="content">
+    <div class="content" ng-controller="bugsController">
         <label for="">Bug :</label>
-        <input type="text" name="" id="txtBugTitle">
-        <input type="button" value="Add Bug">
-        <input type="button" value="Remove Completed">
-        <ol></ol>
+        <input type="text" name="" id="txtBugTitle" ng-model="newBugTitle">
+        <input type="button" value="Add Bug" ng-click="addNewBug()">
+        <input type="button" value="Remove Completed" ng-click="removeClosed()">
+        <ol>
+            <li ng-repeat="bug in bugs" ng-bind="bug.title" ng-click="toggleStatus(bug)" ng-class="{closed : bug.isClosed}"></li>
+        </ol>
     </div>
 </body>
 </html>
