@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        div{
+            margin: 10px;
+            padding: 10px;
+            border : 2px solid;
+        }
+        .parent{
+            border-color: blue;
+            background-color: lightblue;
+        }
+        .child {
+            border-color: red;
+            background-color: lightpink;
+        }
+    </style>
+    <script src="angular.min.js"></script>
+    <script>
+    angular
+        .module("controllerDemo", [])
+        .run(function($rootScope){
+            $rootScope.name = "Magesh"
+        })
+        .controller("childControllerOne", function(){})
+        .controller("childControllerTwo", function(){})
+    window.addEventListener("DOMContentLoaded", function(){
+        angular.bootstrap(document.body,['controllerDemo']);
+    });
+    </script>
+</head>
+<body>
+    <div class="parent">
+        <div class="child" ng-controller="childControllerOne">
+            <input type="text" ng-model="name">
+            <div ng-bind="name"></div>
+
+            <div class="child" ng-controller="childControllerTwo">
+                <input type="text" ng-model="name">
+                <div ng-bind="name"></div>
+            </div>
+        </div>
+
+        <input type="text" ng-model="name">
+    </div>
+</body>
+</html>
