@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Salary Calculator</title>
+    <script src="jquery-1.11.2.js"></script>
+    <style>
+    label{
+        display : block;
+    }
+        #divResult{
+            font-size: 32pt;
+            color: red;
+        }
+        #rangeTax{
+            background-color: blue;
+        }
+    </style>
+    <script>
+    function SalaryCalculator(){
+        this.basic = 0
+        this.hra = 0;
+        this.da = 0;
+        this.tax = 0;
+        this.salary = 0;
+    }
+    SalaryCalculator.prototype.calculate = function(){
+        var gross = this.basic + this.hra + this.da;
+        this.salary = gross * ((100-this.tax)/100);
+    }
+    
+    $(function(){
+        var calculator = new SalaryCalculator();
+        $("#btnCalculate").click(function(){
+            calculator.basic = parseInt($("#txtBasic").val(),10);
+            calculator.hra = parseInt($("#txtHra").val(),10);
+            calculator.da = parseInt($("#txtDa").val(),10);
+            calculator.tax = parseInt($("#rangeTax").val(),10);
+            
+            calculator.calculate();
+            
+            $("#divResult").html(calculator.salary);
+        });
+        $("#rangeTax").change(function(){
+            $("#spanTax").text(this.value + '%');
+        });
+    });
+    </script>
+</head>
+<body>
+    <h1>Salary Calculator</h1>
+    <hr>
+    <div><label for="">Basic :</label><input type="text" name="" id="txtBasic"></div>
+    <div><label for="">HRA :</label><input type="text" name="" id="txtHra"></div>
+    <div><label for="">DA :</label><input type="text" name="" id="txtDa"></div>
+    <div>
+        <label for="">Tax %:</label>
+        <input type="range" name="" id="rangeTax" min="0" max="30" value="0">
+        <span id="spanTax">[Tax]</span>
+    </div>
+    <div><input type="button" value="Calculate" id="btnCalculate"></div>
+    <div>
+        <div id="divResult">[Salary]</div>
+    </div>
+</body>
+</html>
