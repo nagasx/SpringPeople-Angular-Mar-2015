@@ -37,37 +37,81 @@
 
         angular
             .module('bugTrackerApp',[])
+           /* .factory('bugStorage', function(Bug){
+                var storage = window.localStorage;
+                function saveBug(bug){
+                    storage.setItem(bug.id, JSON.stringify(bug));
+                }
+                function getAllBugs(){
+                    var result = [];
+                    for(var i=0; i<storage.length;i++){
+                        var dataAsString = storage.getItem(storage.key(i));
+                        var dataAsObject = JSON.parse(dataAsString);
+                        result.push(new Bug(dataAsObject));
+                    }
+                    return result;
+                }
+                function removeBug(id){
+                    storage.removeItem(id);
+                }
+                return {
+                    save : saveBug,
+                    getAll : getAllBugs,
+                    remove : removeBug
+                };
+            })*/
+             .service('bugStorage', function(Bug){
+                var storage = window.localStorage;
+                this.save = function (bug){
+                    storage.setItem(bug.id, JSON.stringify(bug));
+                };
+                this.getAll = function (){
+                    var result = [];
+                    for(var i=0; i<storage.length;i++){
+                        var dataAsString = storage.getItem(storage.key(i));
+                        var dataAsObject = JSON.parse(dataAsString);
+                        result.push(new Bug(dataAsObject));
+                    }
+                    return result;
+                };
+                this.remove = function (id){
+                    storage.removeItem(id);
+                };
+            })
             .factory('Bug', function(){
 
-                var bugClass = function(title, isClosed){
-                    this.title = title;
-                    this.isClosed = isClosed || false;
+                var bugClass = function(data){
+                    data = data || {};
+                    this.id = data.id || new Date().valueOf().toString();
+                    this.title = data.title || '';
+                    this.isClosed = data.isClosed || false;
                 }
                 bugClass.prototype.toggleStatus = function(){
                     this.isClosed = !this.isClosed;
                 };
                 return bugClass;
             })
-            .controller('bugsController', function($scope, Bug){
-                $scope.newBugTitle = '';
+            .controller('bugsController', function($scope, Bug, bugStorage){
+                $scope.newBugData = {title : ''};
                 $scope.addNewBug = function(){
-                    var newBug = new Bug($scope.newBugTitle);
+                    var newBug = new Bug($scope.newBugData);
                     $scope.bugs.push(newBug);
-                    $scope.newBugTitle = '';
+                    bugStorage.save(newBug);
+                    $scope.newBug.title = '';
                 }
-                $scope.bugs = [
-                   /* new Bug('Login button not enabled'),
-                    new Bug('Application crashes frequently'),
-                    new Bug('Response too slow')*/
-                ];
+                $scope.bugs = bugStorage.getAll();
+
                 $scope.toggleStatus = function(bug){
                     bug.toggleStatus();
+                    bugStorage.save(bug);
                 };
                 $scope.removeClosed = function(){
                     for(var i= $scope.bugs.length -1; i>=0; i--){
                         var bug = $scope.bugs[i];
-                        if (bug.isClosed)
+                        if (bug.isClosed){
                             $scope.bugs.splice(i,1);
+                            bugStorage.remove(bug.id);
+                        }
                     }
                 };
             });
@@ -79,7 +123,7 @@
     <hr>
     <div class="content" ng-controller="bugsController">
         <label for="">Bug :</label>
-        <input type="text" name="" id="txtBugTitle" ng-model="newBugTitle">
+        <input type="text" name="" id="txtBugTitle" ng-model="newBugData.title">
         <input type="button" value="Add Bug" ng-click="addNewBug()">
         <input type="button" value="Remove Completed" ng-click="removeClosed()">
         <ol>
