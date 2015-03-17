@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Angular Directives</title>
+    <script src="jquery-1.11.2.js"></script>
+    <script src="angular.min.js"></script>
+    <script>
+    angular.module("myApp",[])
+        .directive("currentTime", function(){
+            return {
+                restrict : 'EA',
+                transclude : true,
+                replace : true,
+                scope : {},
+                link : function(scope, elem, attrs){
+                    elem.click(function(){
+                        elem.hide();
+                    });
+                    setInterval(function(){
+                        elem.text(new Date().toString());
+                    },1000);
+                }
+            }
+            /*return function(scope, elem, attrs){
+                elem.click(function(){
+                    elem.hide();
+                });
+                setInterval(function(){
+                    elem.text(new Date().toString());
+                },1000);
+            }*/
+        });
+    </script>
+</head>
+<body ng-app="myApp">
+    <div current-time></div>
+</body>
+</html>
