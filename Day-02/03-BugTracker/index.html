@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bug Tracker</title>
+    <style>
+
+        ol{
+            list-style: none;
+        }
+        div.bug {
+             border : 2px solid ;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        div.closed{
+            border-color: red;
+            background: -webkit-linear-gradient(top, white 1%, lightpink 100%);
+        }
+        div.active{
+            border-color: blue;
+            background: -webkit-linear-gradient(top, white 1%, lightblue 100%);
+        }
+        label{
+            display : block;
+        }
+        .bug h3{
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+    <script src="angular.min.js"></script>
+
+    <script>
+
+
+        /*
+        window.localStorage
+            - collection of key/value pairs
+            - both key and value should be of type string
+            APIs
+                - setItem(k,v)
+                - getItem(k) => value
+                - removeItem(k)
+                - clear()
+                - key(index) => key
+                - length
+
+                newKey = new Date().valueOf().toString()
+                window.JSON.stringify(emp) -> for serializing an object to a JSON string
+                window.JSON.parse(jsonString) -> for deserializing a JSON string to an object
+        */
+
+
+
+        angular
+            .module('bugTrackerApp',[])
+           /* .factory('bugStorage', function(Bug){
+                var storage = window.localStorage;
+                function saveBug(bug){
+                    storage.setItem(bug.id, JSON.stringify(bug));
+                }
+                function getAllBugs(){
+                    var result = [];
+                    for(var i=0; i<storage.length;i++){
+                        var dataAsString = storage.getItem(storage.key(i));
+                        var dataAsObject = JSON.parse(dataAsString);
+                        result.push(new Bug(dataAsObject));
+                    }
+                    return result;
+                }
+                function removeBug(id){
+                    storage.removeItem(id);
+                }
+                return {
+                    save : saveBug,
+                    getAll : getAllBugs,
+                    remove : removeBug
+                };
+            })*/
+             .service('bugStorage', function(Bug){
+                var storage = window.localStorage;
+                this.save = function (bug){
+                    storage.setItem(bug.id, JSON.stringify(bug));
+                };
+                this.getAll = function (){
+                    var result = [];
+                    for(var i=0; i<storage.length;i++){
+                        var dataAsString = storage.getItem(storage.key(i));
+                        var dataAsObject = JSON.parse(dataAsString);
+                        result.push(new Bug(dataAsObject));
+                    }
+                    return result;
+                };
+                this.remove = function (id){
+                    storage.removeItem(id);
+                };
+            })
+            .factory('Bug', function(){
+
+                var bugClass = function(data){
+                    data = data || {}   ;
+                    this.id = data.id || new Date().valueOf().toString();
+                    this.title = data.title || '';
+                    this.description = data.description || 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+                    this.createdAt = data.createdAt || new Date();
+                    this.isClosed = data.isClosed || false;
+                }
+                bugClass.prototype.toggleStatus = function(){
+                    this.isClosed = !this.isClosed;
+                };
+                return bugClass;
+            })
+            .controller('bugsController', function($scope, Bug, bugStorage){
+                $scope.newBugData = {title : ''};
+                $scope.addNewBug = function(){
+                    var newBug = new Bug($scope.newBugData);
+                    $scope.bugs.push(newBug);
+                    bugStorage.save(newBug);
+                    $scope.newBugData.title = '';
+                }
+                $scope.bugs = bugStorage.getAll();
+
+                $scope.toggleStatus = function(bug){
+                    bug.toggleStatus();
+                    bugStorage.save(bug);
+                };
+                $scope.removeClosed = function(){
+                    for(var i= $scope.bugs.length -1; i>=0; i--){
+                        var bug = $scope.bugs[i];
+                        if (bug.isClosed){
+                            $scope.bugs.splice(i,1);
+                            bugStorage.remove(bug.id);
+                        }
+                    }
+                };
+            });
+
+    </script>
+</head>
+<body ng-app="bugTrackerApp">
+    <h1>Bug Tracker</h1>
+    <hr>
+    <div class="content" ng-controller="bugsController">
+        <label for="">Bug :</label>
+        <input type="text" name="" id="txtBugTitle" ng-model="newBugData.title">
+        <label for="">Description</label>
+        <textarea rows="5" cols="50" ng-model="newBugData.description"></textarea>
+        <br>
+        <input type="button" value="Add Bug" ng-click="addNewBug()">
+        <input type="button" value="Remove Completed" ng-click="removeClosed()">
+        <hr>
+        <h3>Search</h3>
+        <input type="text" ng-model="searchBug.title">
+        <label for="">Closed ?</label>
+        <input type="checkbox" ng-model="searchBug.isClosed">
+        <label for="">Order By</label>
+        <select ng-model="bugOrderBy">
+            <option ng-repeat="(key,value) in bugs[0]" >{{key}}</option>
+        </select>
+        <hr>
+        <ol>
+            <li ng-repeat="bug in bugs | filter:searchBug | orderBy:bugOrderBy"  >
+               <div class="bug" ng-class="{active : !bug.isClosed, closed : bug.isClosed}">
+                    <h3>{{bug.title}}</h3>
+                    <i>{{bug.createdAt}}</i>
+                    <div>{{bug.description}}</div>
+
+                    <input ng-hide="bug.isClosed" type="button" value="Close" ng-click="toggleStatus(bug)">
+                </div>
+            </li>
+        </ol>
+    </div>
+</body>
+</html>

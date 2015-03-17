@@ -58,7 +58,7 @@
     <div>
         <input type="button" value="Calculate" ng-click="calculator.calculate()"></div>
     <div>
-        <div id="divResult" ng-bind="calculator.salary"></div>
+        <div id="divResult">{{calculator.salary | currency:'Rs.'}}</div>
     </div>
     </div>
     <div id="calculator2">
