@@ -131,7 +131,36 @@
                 };
                 return bugClass;
             })
-            .controller('bugsController', function($scope, Bug, bugStorage,$http){
+            .service('bugsDataService', function($http, Bug, $q){
+                /*this.getAll = function(){
+                    var deferred = $q.defer();
+                    $http({
+                        method : "get",
+                        url : "http://localhost:3000/bugs"
+                    }).then(function(response){
+                        console.log(response.data);
+                        var result = response.data.map(
+                            function(bugData){ return new Bug(bugData); });
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
+                }*/
+                this.getAll = function(){
+
+                    var promise = $http({
+                        method : "get",
+                        url : "http://localhost:3000/bugs"
+                    })
+                    return promise.then(function(response){
+                        console.log(response.data);
+                        var result = response.data.map(
+                            function(bugData){ return new Bug(bugData); });
+                        return result;
+                    });
+                }
+
+            })
+            .controller('bugsController', function($scope, Bug, bugStorage, bugsDataService){
                 $scope.newBugData = {title : ''};
                 $scope.addNewBug = function(){
                     var newBug = new Bug($scope.newBugData);
@@ -139,15 +168,15 @@
                     bugStorage.save(newBug);
                     $scope.newBugData.title = '';
                 }
+                bugsDataService.getAll()
+                    .then(function(bugs){
+                        $scope.bugs = bugs;
+                    })
+                    .catch(function(){
+                        console.log("Something is wrong");
+                    });
 
-                $scope.bugs = [];
-                $http({
-                    method : "get",
-                    url : "http://localhost:3000/bugs"
-                }).then(function(response){
-                    console.log(response.data);
-                    $scope.bugs = response.data;
-                });
+
                 $scope.toggleStatus = function(bug){
                     bug.toggleStatus();
                     bugStorage.save(bug);
@@ -202,10 +231,6 @@
                 </div>
             </li>
         </ol>
-        <div>
-            {{bugs | json}}
-        </div>
     </div>
-
 </body>
 </html>

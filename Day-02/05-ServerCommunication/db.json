@@ -1,0 +1,18 @@
+{
+  "bugs": [
+    {
+      "id": "1426504847011",
+      "title": "Login button is disabled - from server",
+      "description": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "createdAt": "2015-03-17T10:05:08.669Z",
+      "isClosed": false
+    },
+    {
+      "id": "1426504863147",
+      "title": "Data not saved in the server - from server",
+      "description": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "createdAt": "2015-03-17T10:05:08.669Z",
+      "isClosed": false
+    }
+  ]
+}
