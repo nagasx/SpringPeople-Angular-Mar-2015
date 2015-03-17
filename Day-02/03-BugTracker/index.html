@@ -31,6 +31,7 @@
         }
     </style>
     <script src="angular.min.js"></script>
+    <script src="moment.js"></script>
 
     <script>
 
@@ -52,10 +53,28 @@
                 window.JSON.parse(jsonString) -> for deserializing a JSON string to an object
         */
 
+        angular.module("utils",[])
+            .value("defaultLengthLimit", 300)
+            .filter('trimLength', function($filter, defaultLengthLimit){
+                return function(data, lengthLimit){
+                    lengthLimit = lengthLimit || defaultLengthLimit;
+                    data = data || '';
+                    var limitTo = $filter('limitTo');
+                    return data.length > lengthLimit ? limitTo(data,lengthLimit) + "..." : data;
+                }
+            })
+            .value("myMoment", moment)
+            .filter("toMoment", function(myMoment){
+                return function(data){
+                    data = data || new Date();
+                    return myMoment(data).fromNow();
+                };
+            });
 
 
         angular
-            .module('bugTrackerApp',[])
+            .module('bugTrackerApp',["utils"])
+            .value("defaultLengthLimit", 400)
            /* .factory('bugStorage', function(Bug){
                 var storage = window.localStorage;
                 function saveBug(bug){
@@ -135,7 +154,8 @@
                         }
                     }
                 };
-            });
+            })
+
 
     </script>
 </head>
@@ -156,16 +176,20 @@
         <label for="">Closed ?</label>
         <input type="checkbox" ng-model="searchBug.isClosed">
         <label for="">Order By</label>
-        <select ng-model="bugOrderBy">
+
+        <select ng-model="bugOrderBy" >
             <option ng-repeat="(key,value) in bugs[0]" >{{key}}</option>
         </select>
+        <label for="">Description length :</label>
+        <input type="range" min="100" max="1000" ng-model="descLengthLimit" >
+        <span>{{descLengthLimit}}</span>
         <hr>
         <ol>
             <li ng-repeat="bug in bugs | filter:searchBug | orderBy:bugOrderBy"  >
                <div class="bug" ng-class="{active : !bug.isClosed, closed : bug.isClosed}">
                     <h3>{{bug.title}}</h3>
-                    <i>{{bug.createdAt}}</i>
-                    <div>{{bug.description}}</div>
+                    <i>{{bug.createdAt | toMoment}}</i>
+                    <div>{{bug.description | trimLength}}</div>
 
                     <input ng-hide="bug.isClosed" type="button" value="Close" ng-click="toggleStatus(bug)">
                 </div>
